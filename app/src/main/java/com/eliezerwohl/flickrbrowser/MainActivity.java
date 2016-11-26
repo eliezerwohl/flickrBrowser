@@ -9,7 +9,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.List;
+
+import static android.R.attr.data;
+
+public class MainActivity extends AppCompatActivity implements GetFlickrJsonData.OnDataAvailable {
     private static final String TAG = "MainActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,8 +22,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        GetRawData getRawData = new GetRawData(this);
-        getRawData.execute("https://api.flickr.com/services/feeds/photos_public.gne?tags=android,nougat,sdk&tagmode=any&format=json&nojsoncallback=1");
+//        GetRawData getRawData = new GetRawData(this);
+//        getRawData.execute("https://api.flickr.com/services/feeds/photos_public.gne?tags=android,nougat,sdk&tagmode=any&format=json&nojsoncallback=1");
 
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
@@ -32,6 +36,14 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate ends");
     }
 
+    @Override
+    protected void onResume(){
+        Log.d(TAG, "onResume: starts");
+        super.onResume();
+        GetFlickrJsonData getFlickrJsonData = new GetFlickrJsonData(this, "http://api.flickr.com/services/feeds/photos_public.gne", "en_us", true);
+        getFlickrJsonData.executeOnSameThreat("android, nougat");
+        Log.d(TAG, "onResume: ends");
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -55,11 +67,12 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
         
     }
-    public void onDownloadComplete(String data, DownloadStatus status){
+    @Override
+    public void onDataAvailable(List<Photo> data, DownloadStatus status){
         if (status == DownloadStatus.OK){
-            Log.d(TAG, "onDownloadComplete: data is" + data);
+            Log.d(TAG, "onDataAvailable: data is" + data);
         }else{
-            Log.e(TAG, "onDownloadComplete: faield with status" + status);
+            Log.e(TAG, "onDataAvailable: faield with status" + status);
         }
     }
 }
